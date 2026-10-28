@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include <cutils/memory.h>
+#include "memset.h"
 #include <log/log.h>
 
 #include "buffer.h"

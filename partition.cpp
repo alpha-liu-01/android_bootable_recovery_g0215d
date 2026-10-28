@@ -721,7 +721,12 @@ void TWPartition::Setup_Data_Partition(bool Display_Error) {
 			if (is_device_fbe == 1)
 				LOGERR("Unable to decrypt FBE device\n");
 		} else {
-			DataManager::SetValue(TW_IS_ENCRYPTED, 0);
+			// A pattern or PIN still has to be entered for credential-encrypted
+			// storage. Clearing this here skips that page.
+			int pwd_type = 0;
+			DataManager::GetValue(TW_CRYPTO_PWTYPE, pwd_type);
+			if (pwd_type == 0)
+				DataManager::SetValue(TW_IS_ENCRYPTED, 0);
 			#ifndef TW_PREPARE_DATA_MEDIA_EARLY
 			if (datamedia)
 				Setup_Data_Media();
@@ -780,9 +785,11 @@ bool TWPartition::Decrypt_FBE_DE() {
 	ExcludeAll(Mount_Point + "/per_boot"); // removed each boot by init
 	ExcludeAll(Mount_Point + "/gsi"); // cow devices
 
-	int retry_count = 3;
+	// The software keymaster is started on demand and is not registered for
+	// the first few hundred milliseconds. Three tries at 2ms never see it.
+	int retry_count = 50;
 	while (!Decrypt_DE() && --retry_count)
-		usleep(2000);
+		usleep(100000);
 	if (retry_count > 0) {
 		PartitionManager.Set_Crypto_State();
 		Is_Encrypted = true;

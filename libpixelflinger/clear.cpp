@@ -16,6 +16,7 @@
 */
 
 #include <cutils/memory.h>
+#include "memset.h"
 
 #include "clear.h"
 #include "buffer.h"

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include <cutils/memory.h>
+#include "memset.h"
 #include <log/log.h>
 
 #include "trap.h"

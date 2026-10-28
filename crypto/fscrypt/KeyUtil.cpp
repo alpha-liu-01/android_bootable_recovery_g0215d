@@ -149,10 +149,15 @@ static std::string buildLegacyKeyName(const std::string& prefix, const std::stri
 // old to support FS_IOC_ADD_ENCRYPTION_KEY and FS_IOC_REMOVE_ENCRYPTION_KEY.
 static bool fscryptKeyring(key_serial_t* device_keyring) {
     *device_keyring = keyctl_search(KEY_SPEC_SESSION_KEYRING, "keyring", "fscrypt", 0);
+    if (*device_keyring != -1) return true;
+    // This 4.4 recovery init never runs the system installkey path, so the
+    // session keyring has no "fscrypt" keyring until something creates it.
+    *device_keyring = add_key("keyring", "fscrypt", nullptr, 0, KEY_SPEC_SESSION_KEYRING);
     if (*device_keyring == -1) {
-        PLOG(ERROR) << "Unable to find device keyring";
+        PLOG(ERROR) << "Unable to create device keyring";
         return false;
     }
+    LOG(INFO) << "Created fscrypt keyring " << *device_keyring;
     return true;
 }
 

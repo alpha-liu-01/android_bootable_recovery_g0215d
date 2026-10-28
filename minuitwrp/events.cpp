@@ -545,13 +545,9 @@ static int vk_modify(struct ev *e, struct input_event *ev)
             break;
 
 		case ABS_MT_PRESSURE: //3a
-                    if (ev->value == 0)
-            {
-                // We're in a touch release, although some devices will still send positions as well
-                e->mt_p.x = 0;
-                e->mt_p.y = 0;
-                touchReleaseOnNextSynReport = 1;
-            }
+            // Atmel T100 on this panel reports amplitude 0 for a real contact.
+            // Treating that as finger-up discards the press. Release is the
+            // tracking-id of -1 below.
 #ifdef _EVENT_LOGGING
             printf("EV: %s => EV_ABS  ABS_MT_PRESSURE  %d\n", e->deviceName, ev->value);
 #endif

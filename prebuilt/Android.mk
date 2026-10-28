@@ -126,6 +126,9 @@ RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libbmlutils.so
 RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libflashutils.so
 RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libfusesideload.so
 RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libbootloader_message.so
+# Linked by the recovery binary. The platform copy lives in the statsd APEX.
+RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT)/apex/com.android.os.statsd/lib64/libstatssocket.so
+RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libncurses.so
 
 RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libcrypto.so \
 $(if $(WITH_CRYPTO_UTILS),$(TARGET_OUT_SHARED_LIBRARIES)/libcrypto_utils.so)
@@ -165,8 +168,11 @@ ifeq ($(TW_INCLUDE_CRYPTO), true)
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libf2fs_sparseblock.so
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/android.hardware.authsecret@1.0.so
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/android.hardware.oemlock@1.0.so
+    # Titan M transport. This device has no libnos, and copying a missing file fails the ramdisk.
+    ifneq ($(wildcard $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/libnos_transport.so),)
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/libnos_transport.so
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/libnos_datagram.so
+    endif
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/android.hardware.keymaster@3.0.so
     RECOVERY_LIBRARY_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libgpt_twrp.so
     ifeq ($(TARGET_HW_DISK_ENCRYPTION),true)
@@ -505,16 +511,8 @@ ifeq ($(TW_INCLUDE_DUMLOCK), true)
     include $(BUILD_PREBUILT)
 endif
 
-ifeq ($(TW_USE_TOOLBOX), true)
-   include $(CLEAR_VARS)
-   LOCAL_MODULE := mkshrc_twrp
-   LOCAL_MODULE_STEM := mkshrc
-   LOCAL_MODULE_TAGS := optional
-   LOCAL_MODULE_CLASS := ETC
-   LOCAL_MODULE_PATH := $(TARGET_RECOVERY_ROOT_OUT)/system/etc
-   LOCAL_SRC_FILES := $(LOCAL_MODULE)
-   include $(BUILD_PREBUILT)
-endif
+# The platform mkshrc recovery variant already installs this path.
+# Shipping mkshrc_twrp as well overrides the same target and fails the build.
 
 #TWRP App "placeholder"
 include $(CLEAR_VARS)

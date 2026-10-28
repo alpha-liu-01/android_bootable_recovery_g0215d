@@ -669,9 +669,11 @@ std::string unwrapSyntheticPasswordBlob(const std::string& spblob_path, const st
 			// run a separate service that runs user the system user to add the auth token. We wait for the auth token file to be
 			// deleted by the keymaster_auth service and check for a /auth_error file in case of errors. We quit after after a while if
 			// the /auth_token file never gets deleted.
-			int auth_wait_count = 20;
+			// keystore_auth is a separate process. 100ms is not enough for it
+			// to add the token and unlink /auth_token.
+			int auth_wait_count = 100;
 			while (access("/auth_token", F_OK) == 0 && auth_wait_count-- > 0)
-				usleep(5000);
+				usleep(50000);
 			if (auth_wait_count == 0 || access("/auth_error", F_OK) == 0) {
 				printf("error during keymaster_auth service\n");
 				/* If you are getting this error, make sure that you have the keymaster_auth service defined in your init scripts, preferrably in init.recovery.{ro.hardware}.rc

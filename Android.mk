@@ -317,7 +317,7 @@ endif
 ifeq ($(TW_INCLUDE_CRYPTO), true)
     LOCAL_CFLAGS += -DTW_INCLUDE_CRYPTO -DUSE_FSCRYPT -Wno-macro-redefined
     LOCAL_SHARED_LIBRARIES += libcryptfsfde
-    LOCAL_SHARED_LIBRARIES += libgpt_twrp libstatssocket.recovery
+    LOCAL_SHARED_LIBRARIES += libgpt_twrp libstatssocket
     LOCAL_C_INCLUDES += external/boringssl/src/include bootable/recovery/crypto
     LOCAL_C_INCLUDES += $(commands_TWRP_local_path)/crypto/fscrypt
     TW_INCLUDE_CRYPTO_FBE := true
@@ -446,7 +446,7 @@ TWRP_REQUIRED_MODULES += \
     awk \
     toybox \
     toolbox \
-    mkshrc_twrp \
+    mkshrc \
     plat_hwservice_contexts \
     vendor_hwservice_contexts \
     minadbd \
@@ -652,9 +652,9 @@ LOCAL_STATIC_LIBRARIES := \
     libotautil \
     libvintf \
     libcrypto_utils \
-    libcrypto \
     libbase \
-    libziparchive \
+    libziparchive
+LOCAL_SHARED_LIBRARIES := libcrypto
 
 include $(BUILD_STATIC_LIBRARY)
 
