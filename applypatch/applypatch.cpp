@@ -186,8 +186,15 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
       return false;
     }
 
-    const char* partition = pieces[1].c_str();
+    unsigned char buffer[4096];
+    start = len;
+    for (size_t p = 0; p < len; p += sizeof(buffer)) {
+      size_t to_read = len - p;
+      if (to_read > sizeof(buffer)) {
+        to_read = sizeof(buffer);
+      }
 
+      if (!android::base::ReadFully(fd, buffer, to_read)) {
         PLOG(ERROR) << "Failed to verify-read " << partition << " at " << p;
         return false;
       }
